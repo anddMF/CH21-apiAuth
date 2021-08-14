@@ -24,7 +24,7 @@ app.post('/login', (req, res, next) => {
     console.log("user: "+ req.body.user+"; senha: "+ req.body.password)
     if (req.body.user === 'andrew' && req.body.password === '1234') {
         const id = 1;
-        const token = jwt.sign({ id }, process.env.SECRET, { expiresIn: 300 });
+        const token = jwt.sign({ id }, process.env.SECRET, { expiresIn: 3000 });
         return res.json({ auth: true, token: token });
     }
 
