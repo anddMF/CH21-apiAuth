@@ -4,6 +4,7 @@ const express = require('express');
 const app = express();
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const repository = require('../jwt/repositories/user-repository')
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -18,17 +19,19 @@ app.get('/clientes', validateJWT, (req, res, next) => {
     res.json([{ id: 1, name: 'Andrew' }])
 })
 
-app.post('/login', (req, res, next) => {
+app.post('/login', async (req, res, next) => {
     const user = req.body.user;
     const password = req.body.password;
-    console.log("user: "+ req.body.user+"; senha: "+ req.body.password)
-    if (req.body.user === 'andrew' && req.body.password === '1234') {
-        const id = 1;
+
+    const data = await repository.getUser(user, password).then();
+
+    if (data.length > 0) {
+        const id = data[0].ID;
         const token = jwt.sign({ id }, process.env.SECRET, { expiresIn: 3000 });
         return res.json({ auth: true, token: token });
+    } else {
+        return res.status(500).json({ message: 'Invalid login' })
     }
-
-    return res.status(500).json({ message: 'Login inválido!' })
 })
 
 // Apenas para testes, porque posso destruir o token no localstorage do client
@@ -38,15 +41,14 @@ app.post('/logout', function (req, res) {
 
 function validateJWT(req, res, next) {
     const token = req.headers['x-access-token'];
-    console.log('TOKEN: ', token)
 
     if (!token)
         return res.status(401).json({ auth: false, message: 'Token was not provided' });
 
-    jwt.verify(token, process.env.SECRET, function(err, decoded) {
-        if(err)
-            return res.status(500).json({auth: false, message: 'Failed to authenticate token'});
-        
+    jwt.verify(token, process.env.SECRET, function (err, decoded) {
+        if (err)
+            return res.status(500).json({ auth: false, message: 'Failed to authenticate token' });
+
         req.userId = decoded.id;
         next();
     })
