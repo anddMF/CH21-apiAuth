@@ -20,7 +20,7 @@ app.get('/clientes', validateJWT, (req, res, next) => {
 })
 
 app.post('/login', async (req, res, next) => {
-    const user = req.body.user;
+    const user = req.body.email;
     const password = req.body.password;
 
     const data = await repository.getUser(user, password).then();
