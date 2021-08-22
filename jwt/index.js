@@ -28,7 +28,14 @@ app.post('/login', async (req, res, next) => {
     if (data.length > 0) {
         const id = data[0].ID;
         const token = jwt.sign({ id }, process.env.SECRET, { expiresIn: 3000 });
-        return res.json({ data: data, token: token });
+        return res.json({ data: {
+            avatar: data[0].AVATAR,
+            email: data[0].EMAIL,
+            id: data[0].ID,
+            dt_birth: data[0].DT_BIRTH,
+            id_company: data[0].ID_COMPANY,
+            name: data[0].NAME
+        }, token: token });
     } else {
         return res.status(500).json({ message: 'Invalid login' })
     }
